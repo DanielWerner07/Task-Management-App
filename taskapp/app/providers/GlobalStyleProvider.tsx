@@ -1,15 +1,18 @@
 "use client";
 
-import React from "react"
+import React, { Children } from "react"
+import styled from "styled-components";
 
 interface Props {
     children: React.ReactNode;
 }
 
-function GlobalStyleProvider() {
-    return (
-        <div></div>
-    )
+function GlobalStyleProvider({children}: Props) {
+    return <GlobalStyles>{children}</GlobalStyles>
 }
+
+const GlobalStyles = styled.div
+background-color: red;
+;
 
 export default GlobalStyleProvider
