@@ -11,8 +11,8 @@ function GlobalStyleProvider({children}: Props) {
     return <GlobalStyles>{children}</GlobalStyles>
 }
 
-const GlobalStyles = styled.div
-background-color: red;
-;
+const GlobalStyles = styled.div`
+    background-color: red;
+`;
 
 export default GlobalStyleProvider
