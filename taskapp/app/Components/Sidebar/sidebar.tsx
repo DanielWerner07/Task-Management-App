@@ -6,6 +6,7 @@ import styled from "styled-components";
 function Sidebar() {
 const {theme} = useGlobalState();
 
+
 console.log(theme);
 
     return <SidebarStyled>Sidebar</SidebarStyled>
