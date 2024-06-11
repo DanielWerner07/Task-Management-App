@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "./Components/Sidebar/sidebar";
 import GlobalStyleProvider from "./providers/GlobalStyleProvider";
+import ContextProvider from "./providers/ContextProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,11 +20,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <GlobalStyleProvider>
-          <Sidebar/>
-          {children}
-        </GlobalStyleProvider>
-        </body>
+        <ContextProvider>
+          <GlobalStyleProvider>
+            <Sidebar/>
+            {children}
+          </GlobalStyleProvider>
+        </ContextProvider>
+      </body>
     </html>
   );
 }
