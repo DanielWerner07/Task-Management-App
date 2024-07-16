@@ -14,8 +14,8 @@ app.use(bodyParser.json());
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'your_password',
-  database: 'your_database'
+  password: 'Sdjw9@h8dD',
+  database: 'taskApp'
 });
 
 db.connect(err => {

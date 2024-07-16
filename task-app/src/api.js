@@ -11,3 +11,19 @@ export const getTasks = async () => {
     throw error;
   }
 };
+
+app.post('/api/tasks', (req, res) => {
+  const { name } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ error: 'Task name is required' });
+  }
+
+  const sql = 'INSERT INTO tasks (name) VALUES (?)';
+  db.query(sql, [name], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: err });
+    }
+    res.json({ id: result.insertId, name });
+  });
+});
