@@ -134,6 +134,14 @@ app.post('/api/tasks', (req, res) => {
   });
 });
 
+app.get('/api/checkAuth', (req, res) => {
+  if (req.session.userId) {
+    res.json({ authenticated: true });
+  } else {
+    res.json({ authenticated: false });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
