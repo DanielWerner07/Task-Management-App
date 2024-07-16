@@ -10,9 +10,9 @@ app.use(express.json());
 
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'your_username',
-  password: 'your_password',
-  database: 'my_database'
+  user: 'root',
+  password: 'Sdjw9@h8dD',
+  database: 'taskApp'
 });
 
 db.connect(err => {
