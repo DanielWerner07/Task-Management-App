@@ -2,13 +2,13 @@ const express = require('express');
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
-const cors = require('cors'); 
+const cors = require('cors');
 
 const app = express();
 const port = 3001;
 
-app.use(cors()); // Enable CORS
-app.use(express.json()); // Parse JSON requests
+app.use(cors());
+app.use(express.json());
 
 const db = mysql.createConnection({
   host: 'localhost',
@@ -41,13 +41,14 @@ db.connect(err => {
   });
 });
 
-// Register a new user
 app.post('/api/register', 
   body('username').isLength({ min: 3 }).trim().escape(),
   body('password').isLength({ min: 5 }).trim().escape(),
   async (req, res) => {
+    console.log('Request body:', req.body); // Log request body
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array()); // Log validation errors
       return res.status(400).json({ errors: errors.array() });
     }
 
@@ -58,6 +59,7 @@ app.post('/api/register',
       const sql = 'INSERT INTO users (username, password) VALUES (?, ?)';
       db.query(sql, [username, hashedPassword], (err, result) => {
         if (err) {
+          console.error('Error inserting user:', err);
           if (err.code === 'ER_DUP_ENTRY') {
             return res.status(400).json({ error: 'Username already exists' });
           }
@@ -66,18 +68,20 @@ app.post('/api/register',
         res.status(201).json({ message: 'User registered successfully' });
       });
     } catch (err) {
+      console.error('Internal server error:', err);
       res.status(500).json({ error: 'Internal server error' });
     }
   }
 );
 
-// Login a user
 app.post('/api/login', 
   body('username').isLength({ min: 3 }).trim().escape(),
   body('password').isLength({ min: 5 }).trim().escape(),
   (req, res) => {
+    console.log('Request body:', req.body); // Log request body
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array()); // Log validation errors
       return res.status(400).json({ errors: errors.array() });
     }
 
