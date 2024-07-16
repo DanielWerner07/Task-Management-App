@@ -4,17 +4,10 @@ const cors = require('cors');
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 
 const app = express();
 const port = 3001;
-
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
-app.use(express.json());
-app.use(session({
-  secret: 'your-secret-key',
-  resave: false,
-  saveUninitialized: true,
-}));
 
 const db = mysql.createConnection({
   host: 'localhost',
@@ -22,6 +15,18 @@ const db = mysql.createConnection({
   password: 'Sdjw9@h8dD',
   database: 'taskApp'
 });
+
+const sessionStore = new MySQLStore({}, db);
+
+app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
+app.use(express.json());
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  store: sessionStore,
+  cookie: { secure: false } // Set to true if using HTTPS
+}));
 
 db.connect((err) => {
   if (err) {
