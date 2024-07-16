@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const AuthForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState('');
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const validateForm = () => {
     if (username.length < 3) {
@@ -34,7 +34,7 @@ const AuthForm = () => {
       const response = await axios.post(url, { username, password });
       alert(response.data.message);
       setError('');
-      history.push('/home'); // Redirect to home page
+      navigate('/home'); // Redirect to home page
     } catch (error) {
       if (error.response) {
         setError(error.response.data.error || 'An error occurred');

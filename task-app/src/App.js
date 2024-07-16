@@ -1,15 +1,15 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import AuthForm from './AuthForm';
-import Home from './Home'; // Assuming you have a Home component
+import Home from './Home';
 
 const App = () => {
   return (
     <Router>
-      <Switch>
-        <Route path="/home" component={Home} />
-        <Route path="/" component={AuthForm} />
-      </Switch>
+      <Routes>
+        <Route path="/home" element={<Home />} />
+        <Route path="/" element={<AuthForm />} />
+      </Routes>
     </Router>
   );
 };
