@@ -1,21 +1,22 @@
-// npm start to start
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './Home';
+import Login from './Login';
+import Register from './Register';
 import CreateTask from './CreateTask';
-import AuthForm from './AuthForm';
+import withAuth from './withAuth';
 
-function App() {
+const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/create-task" element={<CreateTask />} />
-        <Route path="/login" element={<AuthForm />} />
-        <Route path="/register" element={<AuthForm />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/home" element={withAuth(Home)} />
+        <Route path="/create-task" element={withAuth(CreateTask)} />
       </Routes>
     </Router>
   );
-}
+};
 
 export default App;
