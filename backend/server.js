@@ -1,13 +1,14 @@
+// node server.js to start sever
 const express = require('express');
 const cors = require('cors');
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 
 const app = express();
 const port = 3001;
 
-app.use(cors());
+app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
 app.use(express.json());
 app.use(session({
   secret: 'your-secret-key',
@@ -28,6 +29,44 @@ db.connect((err) => {
     return;
   }
   console.log('connected as id ' + db.threadId);
+
+  // Create users table if it doesn't exist
+  db.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      username VARCHAR(255) NOT NULL UNIQUE,
+      password VARCHAR(255) NOT NULL
+    )
+  `, (err) => {
+    if (err) throw err;
+    console.log('Users table created or already exists');
+  });
+
+  // Create tasks table if it doesn't exist
+  db.query(`
+    CREATE TABLE IF NOT EXISTS tasks (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT,
+      name VARCHAR(255),
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+  `, (err) => {
+    if (err) throw err;
+    console.log('Tasks table created or already exists');
+  });
+
+  // Create steps table if it doesn't exist
+  db.query(`
+    CREATE TABLE IF NOT EXISTS steps (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      task_id INT,
+      description TEXT,
+      FOREIGN KEY (task_id) REFERENCES tasks(id)
+    )
+  `, (err) => {
+    if (err) throw err;
+    console.log('Steps table created or already exists');
+  });
 });
 
 app.post('/api/register', (req, res) => {
