@@ -2,19 +2,19 @@ const express = require('express');
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
-const cors = require('cors');
+const cors = require('cors'); // Add this line
 
 const app = express();
 const port = 3001;
 
-app.use(express.json());
-app.use(cors());
+app.use(cors()); // Enable CORS
+app.use(express.json()); // Parse JSON requests
 
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'root',
-  password: 'Sdjw9@h8dD',
-  database: 'taskApp'
+  user: 'your_username',
+  password: 'your_password',
+  database: 'my_database'
 });
 
 db.connect(err => {
