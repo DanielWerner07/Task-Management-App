@@ -1,15 +1,19 @@
-// node server.js to start sever
 const express = require('express');
-const mysql = require('mysql2');
-const bcrypt = require('bcrypt');
-const { body, validationResult } = require('express-validator');
 const cors = require('cors');
+const mysql = require('mysql');
+const bcrypt = require('bcrypt');
+const session = require('express-session');
 
 const app = express();
 const port = 3001;
 
 app.use(cors());
 app.use(express.json());
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: true,
+}));
 
 const db = mysql.createConnection({
   host: 'localhost',
@@ -18,97 +22,71 @@ const db = mysql.createConnection({
   database: 'taskApp'
 });
 
-db.connect(err => {
+db.connect((err) => {
   if (err) {
-    console.error('Error connecting to MySQL:', err);
+    console.error('error connecting: ' + err.stack);
     return;
   }
-  console.log('Connected to MySQL');
+  console.log('connected as id ' + db.threadId);
+});
 
-  const createUsersTable = `
-    CREATE TABLE IF NOT EXISTS users (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      username VARCHAR(255) NOT NULL UNIQUE,
-      password VARCHAR(255) NOT NULL
-    );
-  `;
-
-  db.query(createUsersTable, (err, result) => {
-    if (err) {
-      console.error('Error creating users table:', err);
-      return;
-    }
-    console.log('Users table created');
+app.post('/api/register', (req, res) => {
+  const { username, password } = req.body;
+  if (username.length < 3 || password.length < 5) {
+    return res.status(400).json({ error: 'Invalid username or password' });
+  }
+  bcrypt.hash(password, 10, (err, hash) => {
+    if (err) throw err;
+    db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hash], (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+      res.json({ message: 'User registered' });
+    });
   });
 });
 
-app.post('/api/register', 
-  body('username').isLength({ min: 3 }).trim().escape(),
-  body('password').isLength({ min: 5 }).trim().escape(),
-  async (req, res) => {
-    console.log('Request body:', req.body); // Log request body
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      console.log('Validation errors:', errors.array()); // Log validation errors
-      return res.status(400).json({ errors: errors.array() });
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  db.query('SELECT * FROM users WHERE username = ?', [username], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
     }
-
-    const { username, password } = req.body;
-
-    try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const sql = 'INSERT INTO users (username, password) VALUES (?, ?)';
-      db.query(sql, [username, hashedPassword], (err, result) => {
-        if (err) {
-          console.error('Error inserting user:', err);
-          if (err.code === 'ER_DUP_ENTRY') {
-            return res.status(400).json({ error: 'Username already exists' });
-          }
-          return res.status(500).json({ error: err.message });
-        }
-        res.status(201).json({ message: 'User registered successfully' });
-      });
-    } catch (err) {
-      console.error('Internal server error:', err);
-      res.status(500).json({ error: 'Internal server error' });
+    if (results.length === 0) {
+      return res.status(400).json({ error: 'User not found' });
     }
-  }
-);
-
-app.post('/api/login', 
-  body('username').isLength({ min: 3 }).trim().escape(),
-  body('password').isLength({ min: 5 }).trim().escape(),
-  (req, res) => {
-    console.log('Request body:', req.body); // Log request body
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      console.log('Validation errors:', errors.array()); // Log validation errors
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { username, password } = req.body;
-
-    const sql = 'SELECT * FROM users WHERE username = ?';
-    db.query(sql, [username], async (err, results) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      if (results.length === 0) {
-        return res.status(400).json({ error: 'User not found' });
-      }
-
-      const user = results[0];
-      const isMatch = await bcrypt.compare(password, user.password);
-
+    const user = results[0];
+    bcrypt.compare(password, user.password, (err, isMatch) => {
+      if (err) throw err;
       if (!isMatch) {
-        return res.status(400).json({ error: 'Invalid credentials' });
+        return res.status(400).json({ error: 'Incorrect password' });
       }
-
-      res.status(200).json({ message: 'Login successful' });
+      req.session.user = user;
+      res.json({ message: 'User logged in' });
     });
+  });
+});
+
+app.post('/api/tasks', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
   }
-);
+  const { taskName, steps } = req.body;
+  db.query('INSERT INTO tasks (user_id, name) VALUES (?, ?)', [req.session.user.id, taskName], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+    const taskId = result.insertId;
+    const stepValues = steps.map(step => [taskId, step]);
+    db.query('INSERT INTO steps (task_id, description) VALUES ?', [stepValues], (err) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+      res.json({ message: 'Task created' });
+    });
+  });
+});
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`Server running on port ${port}`);
 });

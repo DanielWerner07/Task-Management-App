@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const CreateTask = () => {
   const [taskName, setTaskName] = useState('');
   const [steps, setSteps] = useState(['']);
+  const [error, setError] = useState('');
 
   const handleTaskNameChange = (event) => {
     setTaskName(event.target.value);
@@ -24,9 +26,20 @@ const CreateTask = () => {
     setSteps(newSteps);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log('Task created:', { taskName, steps });
+    setError('');
+
+    try {
+      const response = await axios.post('http://localhost:3001/api/tasks', { taskName, steps }, { withCredentials: true });
+      alert(response.data.message);
+    } catch (error) {
+      if (error.response) {
+        setError(error.response.data.error || 'An error occurred');
+      } else {
+        setError('An error occurred');
+      }
+    }
   };
 
   return (
@@ -61,6 +74,7 @@ const CreateTask = () => {
         </div>
         <button type="submit">Create Task</button>
       </form>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );
 };
