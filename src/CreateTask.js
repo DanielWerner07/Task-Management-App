@@ -1,12 +1,32 @@
 import React, { useState } from 'react';
 
 const CreateTask = () => {
-  const [task, setTask] = useState('');
+  const [taskName, setTaskName] = useState('');
+  const [steps, setSteps] = useState(['']);
+
+  const handleTaskNameChange = (event) => {
+    setTaskName(event.target.value);
+  };
+
+  const handleStepChange = (index, event) => {
+    const newSteps = [...steps];
+    newSteps[index] = event.target.value;
+    setSteps(newSteps);
+  };
+
+  const handleAddStep = () => {
+    setSteps([...steps, '']);
+  };
+
+  const handleRemoveStep = (index) => {
+    const newSteps = [...steps];
+    newSteps.splice(index, 1);
+    setSteps(newSteps);
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // Add code to handle task creation, e.g., sending task data to the backend
-    console.log('Task created:', task);
+    console.log('Task created:', { taskName, steps });
   };
 
   return (
@@ -14,12 +34,30 @@ const CreateTask = () => {
       <h2>Create a New Task</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Task:</label>
+          <label>Task Name:</label>
           <input
             type="text"
-            value={task}
-            onChange={(e) => setTask(e.target.value)}
+            value={taskName}
+            onChange={handleTaskNameChange}
           />
+        </div>
+        <div>
+          <label>Steps:</label>
+          {steps.map((step, index) => (
+            <div key={index}>
+              <input
+                type="text"
+                value={step}
+                onChange={(event) => handleStepChange(index, event)}
+              />
+              <button type="button" onClick={() => handleRemoveStep(index)}>
+                Remove Step
+              </button>
+            </div>
+          ))}
+          <button type="button" onClick={handleAddStep}>
+            Add Step
+          </button>
         </div>
         <button type="submit">Create Task</button>
       </form>
