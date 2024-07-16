@@ -7,8 +7,26 @@ const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState('');
 
+  const validateForm = () => {
+    if (username.length < 3) {
+      setError('Username must be at least 3 characters long');
+      return false;
+    }
+    if (password.length < 5) {
+      setError('Password must be at least 5 characters long');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setError('');
+
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       const url = isLogin ? 'http://localhost:3001/api/login' : 'http://localhost:3001/api/register';
       const response = await axios.post(url, { username, password });
@@ -46,7 +64,10 @@ const AuthForm = () => {
         <button type="submit">{isLogin ? 'Login' : 'Register'}</button>
       </form>
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      <button onClick={() => setIsLogin(!isLogin)}>
+      <button onClick={() => {
+        setIsLogin(!isLogin);
+        setError('');
+      }}>
         {isLogin ? 'Switch to Register' : 'Switch to Login'}
       </button>
     </div>
