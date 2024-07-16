@@ -108,18 +108,18 @@ app.post('/api/login', (req, res) => {
       if (!isMatch) {
         return res.status(400).json({ error: 'Incorrect password' });
       }
-      req.session.user = user;
+      req.session.userId = user.id; // Only store user ID in session
       res.json({ message: 'User logged in' });
     });
   });
 });
 
 app.post('/api/tasks', (req, res) => {
-  if (!req.session.user) {
+  if (!req.session.userId) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   const { taskName, steps } = req.body;
-  db.query('INSERT INTO tasks (user_id, name) VALUES (?, ?)', [req.session.user.id, taskName], (err, result) => {
+  db.query('INSERT INTO tasks (user_id, name) VALUES (?, ?)', [req.session.userId, taskName], (err, result) => {
     if (err) {
       return res.status(500).json({ error: 'Database error' });
     }
