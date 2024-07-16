@@ -5,6 +5,7 @@ const AuthForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -12,8 +13,13 @@ const AuthForm = () => {
       const url = isLogin ? 'http://localhost:3001/api/login' : 'http://localhost:3001/api/register';
       const response = await axios.post(url, { username, password });
       alert(response.data.message);
+      setError('');
     } catch (error) {
-      alert(error.response.data.error);
+      if (error.response) {
+        setError(error.response.data.error || 'An error occurred');
+      } else {
+        setError('An error occurred');
+      }
     }
   };
 
@@ -39,6 +45,7 @@ const AuthForm = () => {
         </div>
         <button type="submit">{isLogin ? 'Login' : 'Register'}</button>
       </form>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
       <button onClick={() => setIsLogin(!isLogin)}>
         {isLogin ? 'Switch to Register' : 'Switch to Login'}
       </button>
