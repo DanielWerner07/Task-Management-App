@@ -18,7 +18,10 @@ const db = mysql.createConnection({
 
 const sessionStore = new MySQLStore({}, db);
 
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true // This is crucial for allowing cookies to be sent
+}));
 app.use(express.json());
 app.use(session({
   secret: 'your-secret-key',
