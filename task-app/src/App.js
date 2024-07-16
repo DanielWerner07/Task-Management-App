@@ -1,8 +1,11 @@
-import './App.css';
+import React from 'react';
+import AuthForm from './AuthForm';
 
 function App() {
   return (
-    <h1>Hello, world!</h1>
+    <div className="App">
+      <AuthForm />
+    </div>
   );
 }
 
