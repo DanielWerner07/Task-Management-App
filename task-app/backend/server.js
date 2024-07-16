@@ -41,8 +41,8 @@ db.connect(err => {
 
 // Register a new user
 app.post('/api/register', 
-  body('username').isLength({ min: 3 }),
-  body('password').isLength({ min: 5 }),
+  body('username').isLength({ min: 3 }).trim().escape(),
+  body('password').isLength({ min: 5 }).trim().escape(),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -56,7 +56,10 @@ app.post('/api/register',
       const sql = 'INSERT INTO users (username, password) VALUES (?, ?)';
       db.query(sql, [username, hashedPassword], (err, result) => {
         if (err) {
-          return res.status(500).json({ error: err });
+          if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: 'Username already exists' });
+          }
+          return res.status(500).json({ error: err.message });
         }
         res.status(201).json({ message: 'User registered successfully' });
       });
@@ -68,8 +71,8 @@ app.post('/api/register',
 
 // Login a user
 app.post('/api/login', 
-  body('username').isLength({ min: 3 }),
-  body('password').isLength({ min: 5 }),
+  body('username').isLength({ min: 3 }).trim().escape(),
+  body('password').isLength({ min: 5 }).trim().escape(),
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -81,7 +84,7 @@ app.post('/api/login',
     const sql = 'SELECT * FROM users WHERE username = ?';
     db.query(sql, [username], async (err, results) => {
       if (err) {
-        return res.status(500).json({ error: err });
+        return res.status(500).json({ error: err.message });
       }
       if (results.length === 0) {
         return res.status(400).json({ error: 'User not found' });
