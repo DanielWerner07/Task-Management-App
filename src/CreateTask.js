@@ -18,7 +18,7 @@ const CreateTask = () => {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:3001/api/create-task', { taskName, steps }, { withCredentials: true });
+      const response = await axios.post('http://localhost:3001/api/create-task', { taskName, steps });
       alert(response.data.message);
       setTaskName('');
       setSteps(['']);

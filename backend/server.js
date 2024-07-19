@@ -1,13 +1,17 @@
 // node server.js to start sever
 const express = require('express');
+const mysql = require('mysql');
 const cors = require('cors');
-const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
-const session = require('express-session');
-const MySQLStore = require('express-mysql-session')(session);
 
 const app = express();
-const port = 3001;
+
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
+
+app.use(express.json());
 
 const db = mysql.createConnection({
   host: 'localhost',
@@ -16,144 +20,84 @@ const db = mysql.createConnection({
   database: 'taskApp'
 });
 
-const sessionStore = new MySQLStore({}, db);
-
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true // This is crucial for allowing cookies to be sent
-}));
-app.use(express.json());
-app.use(session({
-  secret: 'your-secret-key',
-  resave: false,
-  saveUninitialized: false,
-  store: sessionStore,
-  cookie: { secure: false } // Set to true if using HTTPS
-}));
-
 db.connect((err) => {
   if (err) {
     console.error('error connecting: ' + err.stack);
     return;
   }
   console.log('connected as id ' + db.threadId);
-
-  // Create users table if it doesn't exist
-  db.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      username VARCHAR(255) NOT NULL UNIQUE,
-      password VARCHAR(255) NOT NULL
-    )
-  `, (err) => {
-    if (err) throw err;
-    console.log('Users table created or already exists');
-  });
-
-  // Create tasks table if it doesn't exist
-  db.query(`
-    CREATE TABLE IF NOT EXISTS tasks (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      user_id INT,
-      name VARCHAR(255),
-      FOREIGN KEY (user_id) REFERENCES users(id)
-    )
-  `, (err) => {
-    if (err) throw err;
-    console.log('Tasks table created or already exists');
-  });
-
-  // Create steps table if it doesn't exist
-  db.query(`
-    CREATE TABLE IF NOT EXISTS steps (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      task_id INT,
-      description TEXT,
-      FOREIGN KEY (task_id) REFERENCES tasks(id)
-    )
-  `, (err) => {
-    if (err) throw err;
-    console.log('Steps table created or already exists');
-  });
 });
 
-app.post('/api/register', (req, res) => {
+const createTables = () => {
+  const userTable = `
+    CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      username VARCHAR(255) NOT NULL,
+      password VARCHAR(255) NOT NULL
+    )
+  `;
+
+  const taskTable = `
+    CREATE TABLE IF NOT EXISTS tasks (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      userId INT,
+      FOREIGN KEY (userId) REFERENCES users(id)
+    )
+  `;
+
+  db.query(userTable, (err) => {
+    if (err) throw err;
+    console.log('Users table created');
+  });
+
+  db.query(taskTable, (err) => {
+    if (err) throw err;
+    console.log('Tasks table created');
+  });
+};
+
+createTables();
+
+app.post('/api/register', async (req, res) => {
   const { username, password } = req.body;
   if (username.length < 3 || password.length < 5) {
-    return res.status(400).json({ error: 'Invalid username or password' });
+    return res.status(400).json({ error: 'Invalid username or password length' });
   }
-  bcrypt.hash(password, 10, (err, hash) => {
-    if (err) throw err;
-    db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hash], (err, result) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database error' });
-      }
-      res.json({ message: 'User registered' });
-    });
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'User already exists' });
+    }
+    res.status(200).json({ message: 'User registered successfully' });
   });
 });
 
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
-  db.query('SELECT * FROM users WHERE username = ?', [username], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: 'Database error' });
-    }
+
+  db.query('SELECT * FROM users WHERE username = ?', [username], async (err, results) => {
+    if (err) throw err;
     if (results.length === 0) {
-      return res.status(400).json({ error: 'User not found' });
+      return res.status(400).json({ error: 'Invalid username or password' });
     }
+
     const user = results[0];
-    bcrypt.compare(password, user.password, (err, isMatch) => {
-      if (err) throw err;
-      if (!isMatch) {
-        return res.status(400).json({ error: 'Incorrect password' });
-      }
-      req.session.userId = user.id; // Only store user ID in session
-      res.json({ message: 'User logged in' });
-    });
-  });
-});
 
-app.post('/api/tasks', (req, res) => {
-  if (!req.session.userId) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  const { taskName, steps } = req.body;
-  db.query('INSERT INTO tasks (user_id, name) VALUES (?, ?)', [req.session.userId, taskName], (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: 'Database error' });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return res.status(400).json({ error: 'Invalid username or password' });
     }
-    const taskId = result.insertId;
-    const stepValues = steps.map(step => [taskId, step]);
-    db.query('INSERT INTO steps (task_id, description) VALUES ?', [stepValues], (err) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database error' });
-      }
-      res.json({ message: 'Task created' });
-    });
+
+    res.status(200).json({ message: 'Login successful' });
   });
-});
-
-app.get('/api/checkAuth', (req, res) => {
-  if (req.session.userId) {
-    res.json({ authenticated: true });
-  } else {
-    res.json({ authenticated: false });
-  }
-});
-
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
 });
 
 app.post('/api/create-task', (req, res) => {
   const { taskName, steps } = req.body;
-
-  if (!req.session.userId) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const userId = req.session.userId;
+  const userId = 1; // Assuming we use a static user ID for simplicity
 
   db.query('INSERT INTO tasks (name, userId) VALUES (?, ?)', [taskName, userId], (err, result) => {
     if (err) {
@@ -178,4 +122,8 @@ app.post('/api/create-task', (req, res) => {
       .then(() => res.status(200).json({ message: 'Task created successfully' }))
       .catch(() => res.status(500).json({ error: 'Failed to create task steps' }));
   });
+});
+
+app.listen(3001, () => {
+  console.log('Server running on port 3001');
 });
