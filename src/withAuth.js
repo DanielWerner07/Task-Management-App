@@ -13,12 +13,12 @@ const withAuth = (Component) => {
       .then(response => response.json())
       .then(data => {
         if (!data.authenticated) {
-          navigate('/login');
+          navigate('/');
         }
       })
       .catch(error => {
         console.error('Error:', error);
-        navigate('/login');
+        navigate('/');
       });
     }, [navigate]);
 

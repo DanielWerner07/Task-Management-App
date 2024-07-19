@@ -1,81 +1,62 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const CreateTask = () => {
   const [taskName, setTaskName] = useState('');
   const [steps, setSteps] = useState(['']);
+  const [error, setError] = useState('');
 
-  const handleTaskNameChange = (e) => {
-    setTaskName(e.target.value);
-  };
-
-  const handleStepChange = (index, e) => {
-    const newSteps = steps.slice();
-    newSteps[index] = e.target.value;
+  const addStep = () => setSteps([...steps, '']);
+  const removeStep = (index) => setSteps(steps.filter((_, i) => i !== index));
+  const handleStepChange = (index, value) => {
+    const newSteps = steps.map((step, i) => (i === index ? value : step));
     setSteps(newSteps);
   };
 
-  const handleAddStep = () => {
-    setSteps([...steps, '']);
-  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
 
-  const handleRemoveStep = (index) => {
-    const newSteps = steps.slice();
-    newSteps.splice(index, 1);
-    setSteps(newSteps);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    fetch('http://localhost:3001/api/tasks', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include', // Ensure cookies are sent
-      body: JSON.stringify({ taskName, steps }),
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.error) {
-          alert('Error: ' + data.error);
-        } else {
-          alert('Task created successfully');
-          // Optionally redirect or reset form
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.');
-      });
+    try {
+      const response = await axios.post('http://localhost:3001/api/create-task', { taskName, steps }, { withCredentials: true });
+      alert(response.data.message);
+      setTaskName('');
+      setSteps(['']);
+    } catch (error) {
+      setError(error.response ? error.response.data.error : 'An error occurred');
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label>Task Name:</label>
-        <input type="text" value={taskName} onChange={handleTaskNameChange} required />
-      </div>
-      <div>
-        <label>Steps:</label>
+    <div>
+      <h2>Create Task</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Task Name:</label>
+          <input
+            type="text"
+            value={taskName}
+            onChange={(e) => setTaskName(e.target.value)}
+            required
+          />
+        </div>
         {steps.map((step, index) => (
           <div key={index}>
+            <label>Step {index + 1}:</label>
             <input
               type="text"
               value={step}
-              onChange={(e) => handleStepChange(index, e)}
+              onChange={(e) => handleStepChange(index, e.target.value)}
               required
             />
-            <button type="button" onClick={() => handleRemoveStep(index)}>
-              Remove Step
-            </button>
+            <button type="button" onClick={() => removeStep(index)}>Remove Step</button>
           </div>
         ))}
-        <button type="button" onClick={handleAddStep}>
-          Add Step
-        </button>
-      </div>
-      <button type="submit">Create Task</button>
-    </form>
+        <button type="button" onClick={addStep}>Add Step</button>
+        <button type="submit">Create Task</button>
+      </form>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+    </div>
   );
 };
 

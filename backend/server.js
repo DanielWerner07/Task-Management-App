@@ -145,3 +145,37 @@ app.get('/api/checkAuth', (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+app.post('/api/create-task', (req, res) => {
+  const { taskName, steps } = req.body;
+
+  if (!req.session.userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const userId = req.session.userId;
+
+  db.query('INSERT INTO tasks (name, userId) VALUES (?, ?)', [taskName, userId], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to create task' });
+    }
+
+    const taskId = result.insertId;
+
+    const stepPromises = steps.map(step => {
+      return new Promise((resolve, reject) => {
+        db.query('INSERT INTO steps (taskId, step) VALUES (?, ?)', [taskId, step], (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      });
+    });
+
+    Promise.all(stepPromises)
+      .then(() => res.status(200).json({ message: 'Task created successfully' }))
+      .catch(() => res.status(500).json({ error: 'Failed to create task steps' }));
+  });
+});
