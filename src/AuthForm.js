@@ -33,6 +33,9 @@ const AuthForm = () => {
       const url = isLogin ? 'http://localhost:3001/api/login' : 'http://localhost:3001/api/register';
       const response = await axios.post(url, { username, password });
       alert(response.data.message);
+      if (response.data.userId) {
+        localStorage.setItem('userId', response.data.userId); // Store userId in local storage
+      }
       setError('');
       navigate('/home'); // Redirect to home page
     } catch (error) {

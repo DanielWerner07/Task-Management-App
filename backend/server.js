@@ -40,8 +40,9 @@ const createTables = () => {
   const taskTable = `
     CREATE TABLE IF NOT EXISTS tasks (
       id INT AUTO_INCREMENT PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
       userId INT,
+      name VARCHAR(255) NOT NULL,
+      step VARCHAR(255) NOT NULL,
       FOREIGN KEY (userId) REFERENCES users(id)
     )
   `;
@@ -91,37 +92,28 @@ app.post('/api/login', (req, res) => {
       return res.status(400).json({ error: 'Invalid username or password' });
     }
 
-    res.status(200).json({ message: 'Login successful' });
+    res.status(200).json({ message: 'Login successful', userId: user.id });
   });
 });
 
 app.post('/api/create-task', (req, res) => {
-  const { taskName, steps } = req.body;
-  const userId = 1; // Assuming we use a static user ID for simplicity
+  const { taskName, steps, userId } = req.body;
 
-  db.query('INSERT INTO tasks (name, userId) VALUES (?, ?)', [taskName, userId], (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to create task' });
-    }
-
-    const taskId = result.insertId;
-
-    const stepPromises = steps.map(step => {
-      return new Promise((resolve, reject) => {
-        db.query('INSERT INTO steps (taskId, step) VALUES (?, ?)', [taskId, step], (err, result) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(result);
-          }
-        });
+  const taskQueries = steps.map(step => {
+    return new Promise((resolve, reject) => {
+      db.query('INSERT INTO tasks (name, step, userId) VALUES (?, ?, ?)', [taskName, step, userId], (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
       });
     });
-
-    Promise.all(stepPromises)
-      .then(() => res.status(200).json({ message: 'Task created successfully' }))
-      .catch(() => res.status(500).json({ error: 'Failed to create task steps' }));
   });
+
+  Promise.all(taskQueries)
+    .then(() => res.status(200).json({ message: 'Task created successfully' }))
+    .catch(() => res.status(500).json({ error: 'Failed to create task steps' }));
 });
 
 app.listen(3001, () => {

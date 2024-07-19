@@ -6,6 +6,8 @@ const CreateTask = () => {
   const [steps, setSteps] = useState(['']);
   const [error, setError] = useState('');
 
+  const userId = localStorage.getItem('userId'); // Get userId from local storage
+
   const addStep = () => setSteps([...steps, '']);
   const removeStep = (index) => setSteps(steps.filter((_, i) => i !== index));
   const handleStepChange = (index, value) => {
@@ -17,8 +19,13 @@ const CreateTask = () => {
     event.preventDefault();
     setError('');
 
+    if (!userId) {
+      setError('User not logged in');
+      return;
+    }
+
     try {
-      const response = await axios.post('http://localhost:3001/api/create-task', { taskName, steps });
+      const response = await axios.post('http://localhost:3001/api/create-task', { taskName, steps, userId });
       alert(response.data.message);
       setTaskName('');
       setSteps(['']);
