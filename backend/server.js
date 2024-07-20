@@ -1,6 +1,6 @@
 // node server.js to start sever
 const express = require('express');
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 
@@ -22,10 +22,10 @@ const db = mysql.createConnection({
 
 db.connect((err) => {
   if (err) {
-    console.error('error connecting: ' + err.stack);
+    console.error('Error connecting to the database: ', err.stack);
     return;
   }
-  console.log('connected as id ' + db.threadId);
+  console.log('Connected to the database with ID ', db.threadId);
 });
 
 const createTables = () => {
@@ -42,7 +42,7 @@ const createTables = () => {
       id INT AUTO_INCREMENT PRIMARY KEY,
       userId INT,
       name VARCHAR(255) NOT NULL,
-      step VARCHAR(255) NOT NULL,
+      steps JSON NOT NULL,
       FOREIGN KEY (userId) REFERENCES users(id)
     )
   `;
@@ -58,6 +58,7 @@ const createTables = () => {
   });
 };
 
+
 createTables();
 
 app.post('/api/register', async (req, res) => {
@@ -70,6 +71,7 @@ app.post('/api/register', async (req, res) => {
 
   db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword], (err, result) => {
     if (err) {
+      console.error('Error during registration: ', err);
       return res.status(500).json({ error: 'User already exists' });
     }
     res.status(200).json({ message: 'User registered successfully' });
@@ -80,7 +82,10 @@ app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
 
   db.query('SELECT * FROM users WHERE username = ?', [username], async (err, results) => {
-    if (err) throw err;
+    if (err) {
+      console.error('Error during login: ', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
     if (results.length === 0) {
       return res.status(400).json({ error: 'Invalid username or password' });
     }
@@ -99,10 +104,15 @@ app.post('/api/login', (req, res) => {
 app.post('/api/create-task', (req, res) => {
   const { taskName, steps, userId } = req.body;
 
+  if (!taskName || !Array.isArray(steps) || steps.length === 0 || !userId) {
+    return res.status(400).json({ error: 'Invalid task data' });
+  }
+
   const taskQueries = steps.map(step => {
     return new Promise((resolve, reject) => {
       db.query('INSERT INTO tasks (name, step, userId) VALUES (?, ?, ?)', [taskName, step, userId], (err, result) => {
         if (err) {
+          console.error('Error during task creation for step:', step, err);
           reject(err);
         } else {
           resolve(result);
@@ -113,7 +123,10 @@ app.post('/api/create-task', (req, res) => {
 
   Promise.all(taskQueries)
     .then(() => res.status(200).json({ message: 'Task created successfully' }))
-    .catch(() => res.status(500).json({ error: 'Failed to create task steps' }));
+    .catch(err => {
+      console.error('Failed to create task steps:', err);
+      res.status(500).json({ error: 'Failed to create task steps' });
+    });
 });
 
 app.listen(3001, () => {
