@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const CreateTask = () => {
   const [taskName, setTaskName] = useState('');
   const [steps, setSteps] = useState(['']);
+  const [dueDate, setDueDate] = useState(new Date());
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -27,10 +30,11 @@ const CreateTask = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3001/api/create-task', { taskName, steps, userId });
+      const response = await axios.post('http://localhost:3001/api/create-task', { taskName, steps, dueDate, userId });
       alert(response.data.message);
       setTaskName('');
       setSteps(['']);
+      setDueDate(new Date());
       navigate('/home');
     } catch (error) {
       setError(error.response ? error.response.data.error : 'An error occurred');
@@ -62,6 +66,14 @@ const CreateTask = () => {
             <button type="button" onClick={() => removeStep(index)}>Remove Step</button>
           </div>
         ))}
+        <div>
+          <label>Due Date:</label>
+          <DatePicker
+            selected={dueDate}
+            onChange={(date) => setDueDate(date)}
+            dateFormat="yyyy-MM-dd"
+          />
+        </div>
         <button type="button" onClick={addStep}>Add Step</button>
         <button type="submit">Create Task</button>
       </form>
