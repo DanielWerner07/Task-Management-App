@@ -58,7 +58,6 @@ const createTables = () => {
   });
 };
 
-
 createTables();
 
 app.post('/api/register', async (req, res) => {
@@ -108,25 +107,15 @@ app.post('/api/create-task', (req, res) => {
     return res.status(400).json({ error: 'Invalid task data' });
   }
 
-  const taskQueries = steps.map(step => {
-    return new Promise((resolve, reject) => {
-      db.query('INSERT INTO tasks (name, step, userId) VALUES (?, ?, ?)', [taskName, step, userId], (err, result) => {
-        if (err) {
-          console.error('Error during task creation for step:', step, err);
-          reject(err);
-        } else {
-          resolve(result);
-        }
-      });
-    });
-  });
+  const stepsJSON = JSON.stringify(steps);
 
-  Promise.all(taskQueries)
-    .then(() => res.status(200).json({ message: 'Task created successfully' }))
-    .catch(err => {
-      console.error('Failed to create task steps:', err);
-      res.status(500).json({ error: 'Failed to create task steps' });
-    });
+  db.query('INSERT INTO tasks (name, steps, userId) VALUES (?, ?, ?)', [taskName, stepsJSON, userId], (err, result) => {
+    if (err) {
+      console.error('Error during task creation:', err);
+      return res.status(500).json({ error: 'Failed to create task' });
+    }
+    res.status(200).json({ message: 'Task created successfully' });
+  });
 });
 
 app.listen(3001, () => {
