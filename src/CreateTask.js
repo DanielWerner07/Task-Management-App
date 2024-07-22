@@ -30,7 +30,7 @@ const CreateTask = () => {
     }
 
     try {
-      const formattedDueDate = dueDate.toISOString().split('T')[0]; // Format the due date to YYYY-MM-DD
+      const formattedDueDate = dueDate.toISOString().split('T')[0]; 
       const response = await axios.post('http://localhost:3001/api/create-task', { taskName, steps, dueDate: formattedDueDate, userId });
       alert(response.data.message);
       setTaskName('');
