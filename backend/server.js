@@ -43,6 +43,7 @@ const createTables = () => {
       userId INT,
       name VARCHAR(255) NOT NULL,
       steps JSON NOT NULL,
+      isCompleted BOOLEAN DEFAULT FALSE,
       FOREIGN KEY (userId) REFERENCES users(id)
     )
   `;
@@ -131,5 +132,18 @@ app.get('/api/tasks/:userId', (req, res) => {
       return res.status(500).json({ error: 'Failed to fetch tasks' });
     }
     res.status(200).json(results);
+  });
+});
+
+app.put('/api/tasks/:taskId', (req, res) => {
+  const { taskId } = req.params;
+  const { isCompleted } = req.body;
+
+  db.query('UPDATE tasks SET isCompleted = ? WHERE id = ?', [isCompleted, taskId], (err, result) => {
+    if (err) {
+      console.error('Error updating task:', err);
+      return res.status(500).json({ error: 'Failed to update task' });
+    }
+    res.status(200).json({ message: 'Task updated successfully' });
   });
 });

@@ -26,6 +26,15 @@ const Home = () => {
     }
   };
 
+  const handleTaskCompletion = async (taskId, isCompleted) => {
+    try {
+      await axios.put(`http://localhost:3001/api/tasks/${taskId}`, { isCompleted });
+      fetchTasks(); // Refresh tasks list after updating completion status
+    } catch (error) {
+      setError(error.response ? error.response.data.error : 'An error occurred');
+    }
+  };
+
   return (
     <div>
       <h1>Welcome to the Home Page!</h1>
@@ -35,9 +44,17 @@ const Home = () => {
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <ul>
         {tasks.map(task => (
-          <li key={task.id}>
+          <li key={task.id} style={{ textDecoration: task.isCompleted ? 'line-through' : 'none' }}>
             <h3>{task.name}</h3>
             <p>{JSON.stringify(task.steps)}</p>
+            <label>
+              <input
+                type="checkbox"
+                checked={task.isCompleted}
+                onChange={() => handleTaskCompletion(task.id, !task.isCompleted)}
+              />
+              Completed
+            </label>
           </li>
         ))}
       </ul>
