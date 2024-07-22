@@ -121,3 +121,15 @@ app.post('/api/create-task', (req, res) => {
 app.listen(3001, () => {
   console.log('Server running on port 3001');
 });
+
+app.get('/api/tasks/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  db.query('SELECT * FROM tasks WHERE userId = ?', [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching tasks:', err);
+      return res.status(500).json({ error: 'Failed to fetch tasks' });
+    }
+    res.status(200).json(results);
+  });
+});
