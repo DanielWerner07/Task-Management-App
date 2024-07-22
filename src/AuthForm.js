@@ -41,10 +41,10 @@ const AuthForm = () => {
       const response = await axios.post(url, { username, password });
       alert(response.data.message);
       if (response.data.userId) {
-        localStorage.setItem('userId', response.data.userId); // Store userId in local storage
+        localStorage.setItem('userId', response.data.userId);
       }
       setError('');
-      navigate('/home'); // Redirect to home page
+      navigate('/home');
     } catch (error) {
       if (error.response) {
         setError(error.response.data.error || 'An error occurred');
