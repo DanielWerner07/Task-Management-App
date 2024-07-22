@@ -11,7 +11,7 @@ const Home = () => {
 
   useEffect(() => {
     if (!userId) {
-      navigate('/login'); // Redirect to login if userId is not found
+      navigate('/');
     } else {
       fetchTasks();
     }
