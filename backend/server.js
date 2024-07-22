@@ -1,4 +1,4 @@
-// node server.js to start sever
+// node server.js to start server
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -43,6 +43,7 @@ const createTables = () => {
       userId INT,
       name VARCHAR(255) NOT NULL,
       steps JSON NOT NULL,
+      dueDate DATE NOT NULL,
       isCompleted BOOLEAN DEFAULT FALSE,
       FOREIGN KEY (userId) REFERENCES users(id)
     )
@@ -102,25 +103,21 @@ app.post('/api/login', (req, res) => {
 });
 
 app.post('/api/create-task', (req, res) => {
-  const { taskName, steps, userId } = req.body;
+  const { taskName, steps, dueDate, userId } = req.body;
 
-  if (!taskName || !Array.isArray(steps) || steps.length === 0 || !userId) {
+  if (!taskName || !Array.isArray(steps) || steps.length === 0 || !dueDate || !userId) {
     return res.status(400).json({ error: 'Invalid task data' });
   }
 
   const stepsJSON = JSON.stringify(steps);
 
-  db.query('INSERT INTO tasks (name, steps, userId) VALUES (?, ?, ?)', [taskName, stepsJSON, userId], (err, result) => {
+  db.query('INSERT INTO tasks (name, steps, dueDate, userId) VALUES (?, ?, ?, ?)', [taskName, stepsJSON, dueDate, userId], (err, result) => {
     if (err) {
       console.error('Error during task creation:', err);
       return res.status(500).json({ error: 'Failed to create task' });
     }
     res.status(200).json({ message: 'Task created successfully' });
   });
-});
-
-app.listen(3001, () => {
-  console.log('Server running on port 3001');
 });
 
 app.get('/api/tasks/:userId', (req, res) => {
@@ -146,4 +143,8 @@ app.put('/api/tasks/:taskId', (req, res) => {
     }
     res.status(200).json({ message: 'Task updated successfully' });
   });
+});
+
+app.listen(3001, () => {
+  console.log('Server running on port 3001');
 });
