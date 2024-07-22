@@ -7,7 +7,7 @@ const Home = () => {
   const [tasks, setTasks] = useState([]);
   const [error, setError] = useState('');
 
-  const userId = localStorage.getItem('userId'); // Get userId from local storage
+  const userId = localStorage.getItem('userId'); 
 
   useEffect(() => {
     if (!userId) {
@@ -29,7 +29,7 @@ const Home = () => {
   const handleTaskCompletion = async (taskId, isCompleted) => {
     try {
       await axios.put(`http://localhost:3001/api/tasks/${taskId}`, { isCompleted });
-      fetchTasks(); // Refresh tasks list after updating completion status
+      fetchTasks();
     } catch (error) {
       setError(error.response ? error.response.data.error : 'An error occurred');
     }
