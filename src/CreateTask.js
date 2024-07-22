@@ -65,6 +65,7 @@ const CreateTask = () => {
         <button type="button" onClick={addStep}>Add Step</button>
         <button type="submit">Create Task</button>
       </form>
+      <button onClick={() => navigate('/home')}>Go to Home Page</button>
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );
