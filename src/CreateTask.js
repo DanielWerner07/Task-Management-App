@@ -30,11 +30,11 @@ const CreateTask = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3001/api/create-task', { taskName, steps, dueDate, userId });
+      const formattedDueDate = dueDate.toISOString().split('T')[0]; // Format the due date to YYYY-MM-DD
+      const response = await axios.post('http://localhost:3001/api/create-task', { taskName, steps, dueDate: formattedDueDate, userId });
       alert(response.data.message);
       setTaskName('');
       setSteps(['']);
-      setDueDate(new Date());
       navigate('/home');
     } catch (error) {
       setError(error.response ? error.response.data.error : 'An error occurred');
@@ -66,15 +66,16 @@ const CreateTask = () => {
             <button type="button" onClick={() => removeStep(index)}>Remove Step</button>
           </div>
         ))}
+        <button type="button" onClick={addStep}>Add Step</button>
         <div>
           <label>Due Date:</label>
           <DatePicker
             selected={dueDate}
             onChange={(date) => setDueDate(date)}
             dateFormat="yyyy-MM-dd"
+            required
           />
         </div>
-        <button type="button" onClick={addStep}>Add Step</button>
         <button type="submit">Create Task</button>
       </form>
       <button onClick={() => navigate('/home')}>Go to Home Page</button>

@@ -54,7 +54,8 @@ const Home = () => {
         {tasks.map(task => (
           <li key={task.id} style={{ textDecoration: task.isCompleted ? 'line-through' : 'none' }}>
             <h3>{task.name}</h3>
-            <p>{JSON.stringify(task.steps)}</p>
+            <p>Due Date: {task.dueDate}</p>
+            <p>Steps: {JSON.stringify(task.steps)}</p>
             <label>
               <input
                 type="checkbox"
