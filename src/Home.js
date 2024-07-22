@@ -35,11 +35,19 @@ const Home = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('userId');
+    navigate('/');
+  };
+
   return (
     <div>
       <h1>Welcome to the Home Page!</h1>
       <button onClick={() => navigate('/create-task')}>
         Create New Task
+      </button>
+      <button onClick={handleLogout}>
+        Logout
       </button>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <ul>
