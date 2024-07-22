@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const CreateTask = () => {
   const [taskName, setTaskName] = useState('');
   const [steps, setSteps] = useState(['']);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const userId = localStorage.getItem('userId'); // Get userId from local storage
+  const userId = localStorage.getItem('userId');
 
   const addStep = () => setSteps([...steps, '']);
   const removeStep = (index) => setSteps(steps.filter((_, i) => i !== index));
@@ -29,6 +31,7 @@ const CreateTask = () => {
       alert(response.data.message);
       setTaskName('');
       setSteps(['']);
+      navigate('/home');
     } catch (error) {
       setError(error.response ? error.response.data.error : 'An error occurred');
     }
