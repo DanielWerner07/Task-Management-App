@@ -42,9 +42,8 @@ const AuthForm = () => {
       alert(response.data.message);
       if (response.data.userId) {
         localStorage.setItem('userId', response.data.userId);
+        navigate('/home');
       }
-      setError('');
-      navigate('/home');
     } catch (error) {
       if (error.response) {
         setError(error.response.data.error || 'An error occurred');

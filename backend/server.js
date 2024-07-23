@@ -146,6 +146,24 @@ app.put('/api/tasks/:taskId', (req, res) => {
   });
 });
 
+app.post('/api/register', async (req, res) => {
+  const { username, password } = req.body;
+  if (username.length < 3 || password.length < 5) {
+    return res.status(400).json({ error: 'Invalid username or password length' });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword], (err, result) => {
+    if (err) {
+      console.error('Error during registration: ', err);
+      return res.status(500).json({ error: 'User already exists' });
+    }
+    res.status(200).json({ message: 'User registered successfully', userId: result.insertId });
+  });
+});
+
+
 app.listen(3001, () => {
   console.log('Server running on port 3001');
 });
