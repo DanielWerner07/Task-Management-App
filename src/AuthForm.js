@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import './AuthForm.css';
 
 const AuthForm = () => {
   const [username, setUsername] = useState('');
@@ -54,34 +55,43 @@ const AuthForm = () => {
   };
 
   return (
-    <div>
-      <h2>{isLogin ? 'Login' : 'Register'}</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Username:</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <button type="submit">{isLogin ? 'Login' : 'Register'}</button>
-      </form>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <button onClick={() => {
-        setIsLogin(!isLogin);
-        setError('');
-      }}>
-        {isLogin ? 'Switch to Register' : 'Switch to Login'}
-      </button>
+    <div className="auth-form-container">
+      <div className="auth-form">
+        <h2>{isLogin ? 'Login' : 'Register'}</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Username:</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Password:</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="submit-button">
+            {isLogin ? 'Login' : 'Register'}
+          </button>
+        </form>
+        {error && <p className="error-message">{error}</p>}
+        <button
+          onClick={() => {
+            setIsLogin(!isLogin);
+            setError('');
+          }}
+          className="switch-button"
+        >
+          {isLogin ? 'Make new account' : 'Login'}
+        </button>
+      </div>
     </div>
   );
 };
