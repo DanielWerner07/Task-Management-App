@@ -135,17 +135,38 @@ app.post('/api/create-task', (req, res) => {
 });
 
 
-app.get('/api/tasks/:userId', (req, res) => {
+app.get('/api/user/:userId', (req, res) => {
   const { userId } = req.params;
 
-  db.query('SELECT * FROM tasks WHERE userId = ?', [userId], (err, results) => {
+  db.query('SELECT email FROM users WHERE id = ?', [userId], (err, results) => {
     if (err) {
-      console.error('Error fetching tasks:', err);
-      return res.status(500).json({ error: 'Failed to fetch tasks' });
+      console.error('Error fetching user email:', err);
+      return res.status(500).json({ error: 'Failed to fetch user email' });
     }
-    res.status(200).json(results);
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.status(200).json({ email: results[0].email });
   });
 });
+
+app.put('/api/user/:userId/email', (req, res) => {
+  const { userId } = req.params;
+  const { email } = req.body;
+
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ error: 'Invalid email address' });
+  }
+
+  db.query('UPDATE users SET email = ? WHERE id = ?', [email, userId], (err) => {
+    if (err) {
+      console.error('Error updating email:', err);
+      return res.status(500).json({ error: 'Failed to update email' });
+    }
+    res.status(200).json({ message: 'Email updated successfully' });
+  });
+});
+
 
 app.put('/api/tasks/:taskId', (req, res) => {
   const { taskId } = req.params;
