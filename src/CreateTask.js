@@ -7,7 +7,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 const CreateTask = () => {
   const [taskName, setTaskName] = useState('');
   const [steps, setSteps] = useState(['']);
-  const [dueDate, setDueDate] = useState(new Date());
+  const [dueDate, setDueDate] = useState(null);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -30,11 +30,12 @@ const CreateTask = () => {
     }
 
     try {
-      const formattedDueDate = dueDate.toISOString().split('T')[0]; 
+      const formattedDueDate = dueDate ? dueDate.toISOString().split('T')[0] : null;
       const response = await axios.post('http://localhost:3001/api/create-task', { taskName, steps, dueDate: formattedDueDate, userId });
       alert(response.data.message);
       setTaskName('');
       setSteps(['']);
+      setDueDate(null);
       navigate('/home');
     } catch (error) {
       setError(error.response ? error.response.data.error : 'An error occurred');
@@ -68,12 +69,12 @@ const CreateTask = () => {
         ))}
         <button type="button" onClick={addStep}>Add Step</button>
         <div>
-          <label>Due Date:</label>
+          <label>Due Date (optional):</label>
           <DatePicker
             selected={dueDate}
             onChange={(date) => setDueDate(date)}
             dateFormat="yyyy-MM-dd"
-            required
+            isClearable
           />
         </div>
         <button type="submit">Create Task</button>
