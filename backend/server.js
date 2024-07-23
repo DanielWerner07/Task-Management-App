@@ -63,7 +63,6 @@ const createTables = () => {
 
 createTables();
 
-
 app.post('/api/register', async (req, res) => {
   const { username, password } = req.body;
   if (username.length < 3 || password.length < 5) {
@@ -84,7 +83,6 @@ app.post('/api/register', async (req, res) => {
     res.status(200).json({ message: 'User registered successfully', userId: result.insertId });
   });
 });
-
 
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
