@@ -32,7 +32,7 @@ const createTables = () => {
   const userTable = `
     CREATE TABLE IF NOT EXISTS users (
       id INT AUTO_INCREMENT PRIMARY KEY,
-      username VARCHAR(255) NOT NULL,
+      username VARCHAR(255) NOT NULL UNIQUE,
       password VARCHAR(255) NOT NULL,
       email VARCHAR(255) NULL
     )
@@ -63,6 +63,7 @@ const createTables = () => {
 
 createTables();
 
+
 app.post('/api/register', async (req, res) => {
   const { username, password } = req.body;
   if (username.length < 3 || password.length < 5) {
@@ -73,12 +74,17 @@ app.post('/api/register', async (req, res) => {
 
   db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword], (err, result) => {
     if (err) {
-      console.error('Error during registration: ', err);
-      return res.status(500).json({ error: 'User already exists' });
+      if (err.code === 'ER_DUP_ENTRY') {
+        return res.status(400).json({ error: 'Username already exists' });
+      } else {
+        console.error('Error during registration: ', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
     }
-    res.status(200).json({ message: 'User registered successfully' });
+    res.status(200).json({ message: 'User registered successfully', userId: result.insertId });
   });
 });
+
 
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
@@ -145,24 +151,6 @@ app.put('/api/tasks/:taskId', (req, res) => {
     res.status(200).json({ message: 'Task updated successfully' });
   });
 });
-
-app.post('/api/register', async (req, res) => {
-  const { username, password } = req.body;
-  if (username.length < 3 || password.length < 5) {
-    return res.status(400).json({ error: 'Invalid username or password length' });
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword], (err, result) => {
-    if (err) {
-      console.error('Error during registration: ', err);
-      return res.status(500).json({ error: 'User already exists' });
-    }
-    res.status(200).json({ message: 'User registered successfully', userId: result.insertId });
-  });
-});
-
 
 app.listen(3001, () => {
   console.log('Server running on port 3001');
