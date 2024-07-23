@@ -111,21 +111,13 @@ app.post('/api/login', (req, res) => {
 app.post('/api/create-task', (req, res) => {
   const { taskName, steps, dueDate, userId } = req.body;
 
-  if (!taskName || !Array.isArray(steps) || steps.length === 0 || !userId) {
+  if (!taskName || !Array.isArray(steps) || steps.length === 0 || !dueDate || !userId) {
     return res.status(400).json({ error: 'Invalid task data' });
   }
 
   const stepsJSON = JSON.stringify(steps);
 
-  const query = dueDate 
-    ? 'INSERT INTO tasks (name, steps, dueDate, userId) VALUES (?, ?, ?, ?)'
-    : 'INSERT INTO tasks (name, steps, userId) VALUES (?, ?, ?)';
-
-  const params = dueDate 
-    ? [taskName, stepsJSON, dueDate, userId]
-    : [taskName, stepsJSON, userId];
-
-  db.query(query, params, (err, result) => {
+  db.query('INSERT INTO tasks (name, steps, dueDate, userId) VALUES (?, ?, ?, ?)', [taskName, stepsJSON, dueDate, userId], (err, result) => {
     if (err) {
       console.error('Error during task creation:', err);
       return res.status(500).json({ error: 'Failed to create task' });
@@ -134,39 +126,17 @@ app.post('/api/create-task', (req, res) => {
   });
 });
 
-
-app.get('/api/user/:userId', (req, res) => {
+app.get('/api/tasks/:userId', (req, res) => {
   const { userId } = req.params;
 
-  db.query('SELECT email FROM users WHERE id = ?', [userId], (err, results) => {
+  db.query('SELECT * FROM tasks WHERE userId = ?', [userId], (err, results) => {
     if (err) {
-      console.error('Error fetching user email:', err);
-      return res.status(500).json({ error: 'Failed to fetch user email' });
+      console.error('Error fetching tasks:', err);
+      return res.status(500).json({ error: 'Failed to fetch tasks' });
     }
-    if (results.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    res.status(200).json({ email: results[0].email });
+    res.status(200).json(results);
   });
 });
-
-app.put('/api/user/:userId/email', (req, res) => {
-  const { userId } = req.params;
-  const { email } = req.body;
-
-  if (!email || !email.includes('@')) {
-    return res.status(400).json({ error: 'Invalid email address' });
-  }
-
-  db.query('UPDATE users SET email = ? WHERE id = ?', [email, userId], (err) => {
-    if (err) {
-      console.error('Error updating email:', err);
-      return res.status(500).json({ error: 'Failed to update email' });
-    }
-    res.status(200).json({ message: 'Email updated successfully' });
-  });
-});
-
 
 app.put('/api/tasks/:taskId', (req, res) => {
   const { taskId } = req.params;
