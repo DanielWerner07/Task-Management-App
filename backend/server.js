@@ -111,13 +111,21 @@ app.post('/api/login', (req, res) => {
 app.post('/api/create-task', (req, res) => {
   const { taskName, steps, dueDate, userId } = req.body;
 
-  if (!taskName || !Array.isArray(steps) || steps.length === 0 || !dueDate || !userId) {
+  if (!taskName || !Array.isArray(steps) || steps.length === 0 || !userId) {
     return res.status(400).json({ error: 'Invalid task data' });
   }
 
   const stepsJSON = JSON.stringify(steps);
 
-  db.query('INSERT INTO tasks (name, steps, dueDate, userId) VALUES (?, ?, ?, ?)', [taskName, stepsJSON, dueDate, userId], (err, result) => {
+  const query = dueDate 
+    ? 'INSERT INTO tasks (name, steps, dueDate, userId) VALUES (?, ?, ?, ?)'
+    : 'INSERT INTO tasks (name, steps, userId) VALUES (?, ?, ?)';
+
+  const params = dueDate 
+    ? [taskName, stepsJSON, dueDate, userId]
+    : [taskName, stepsJSON, userId];
+
+  db.query(query, params, (err, result) => {
     if (err) {
       console.error('Error during task creation:', err);
       return res.status(500).json({ error: 'Failed to create task' });
@@ -125,6 +133,7 @@ app.post('/api/create-task', (req, res) => {
     res.status(200).json({ message: 'Task created successfully' });
   });
 });
+
 
 app.get('/api/tasks/:userId', (req, res) => {
   const { userId } = req.params;
