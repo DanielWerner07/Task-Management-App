@@ -44,7 +44,7 @@ const createTables = () => {
       userId INT,
       name VARCHAR(255) NOT NULL,
       steps JSON NOT NULL,
-      dueDate DATE NOT NULL,
+      dueDate DATE,
       isCompleted BOOLEAN DEFAULT FALSE,
       FOREIGN KEY (userId) REFERENCES users(id)
     )
@@ -62,6 +62,7 @@ const createTables = () => {
 };
 
 createTables();
+
 
 app.post('/api/register', async (req, res) => {
   const { username, password } = req.body;
