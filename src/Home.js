@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -41,22 +42,24 @@ const Home = () => {
   };
 
   return (
-    <div>
+    <div className="home-container">
       <h1>Welcome to the Home Page!</h1>
-      <button onClick={() => navigate('/create-task')}>
-        Create New Task
-      </button>
-      <button onClick={handleLogout}>
-        Logout
-      </button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <ul>
+      <div className="buttons-container">
+        <button onClick={() => navigate('/create-task')} className="button">
+          Create New Task
+        </button>
+        <button onClick={handleLogout} className="button logout-button">
+          Logout
+        </button>
+      </div>
+      {error && <p className="error-message">{error}</p>}
+      <ul className="task-list">
         {tasks.map(task => (
-          <li key={task.id} style={{ textDecoration: task.isCompleted ? 'line-through' : 'none' }}>
+          <li key={task.id} className={`task-item ${task.isCompleted ? 'completed' : ''}`}>
             <h3>{task.name}</h3>
             <p>Due Date: {task.dueDate || 'No due date'}</p>
             <p>Steps: {JSON.stringify(task.steps)}</p>
-            <label>
+            <label className="completion-label">
               <input
                 type="checkbox"
                 checked={task.isCompleted}
