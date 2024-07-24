@@ -175,6 +175,23 @@ app.get('/api/users/:userId', (req, res) => {
   });
 });
 
+app.put('/api/users/:userId/email', (req, res) => {
+  const { userId } = req.params;
+  const { email } = req.body;
+
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ error: 'Invalid email address' });
+  }
+
+  db.query('UPDATE users SET email = ? WHERE id = ?', [email, userId], (err, result) => {
+    if (err) {
+      console.error('Error updating email:', err);
+      return res.status(500).json({ error: 'Failed to update email' });
+    }
+    res.status(200).json({ message: 'Email updated successfully' });
+  });
+});
+
 app.listen(3001, () => {
   console.log('Server running on port 3001');
 });
