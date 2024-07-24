@@ -160,6 +160,21 @@ app.put('/api/tasks/:taskId', (req, res) => {
   });
 });
 
+app.get('/api/users/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  db.query('SELECT username FROM users WHERE id = ?', [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching user details:', err);
+      return res.status(500).json({ error: 'Failed to fetch user details' });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.status(200).json({ username: results[0].username });
+  });
+});
+
 app.listen(3001, () => {
   console.log('Server running on port 3001');
 });
