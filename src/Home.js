@@ -48,6 +48,9 @@ const Home = () => {
         <button onClick={() => navigate('/create-task')} className="button">
           Create New Task
         </button>
+        <button onClick={() => navigate('/account')} className="button">
+          Account
+        </button>
         <button onClick={handleLogout} className="button logout-button">
           Logout
         </button>
