@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import './CreateTask.css';
 
 const CreateTask = () => {
   const [taskName, setTaskName] = useState('');
@@ -43,10 +44,10 @@ const CreateTask = () => {
   };
 
   return (
-    <div>
+    <div className="create-task-container">
       <h2>Create Task</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form onSubmit={handleSubmit} className="create-task-form">
+        <div className="form-group">
           <label>Task Name:</label>
           <input
             type="text"
@@ -56,7 +57,7 @@ const CreateTask = () => {
           />
         </div>
         {steps.map((step, index) => (
-          <div key={index}>
+          <div key={index} className="form-group">
             <label>Step {index + 1}:</label>
             <input
               type="text"
@@ -64,11 +65,11 @@ const CreateTask = () => {
               onChange={(e) => handleStepChange(index, e.target.value)}
               required
             />
-            <button type="button" onClick={() => removeStep(index)}>Remove Step</button>
+            <button type="button" onClick={() => removeStep(index)} className="button remove-step-button">Remove Step</button>
           </div>
         ))}
-        <button type="button" onClick={addStep}>Add Step</button>
-        <div>
+        <button type="button" onClick={addStep} className="button add-step-button">Add Step</button>
+        <div className="form-group">
           <label>Due Date (optional):</label>
           <DatePicker
             selected={dueDate}
@@ -77,10 +78,10 @@ const CreateTask = () => {
             isClearable
           />
         </div>
-        <button type="submit">Create Task</button>
+        <button type="submit" className="button submit-button">Create Task</button>
       </form>
-      <button onClick={() => navigate('/home')}>Go to Home Page</button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <button onClick={() => navigate('/home')} className="button go-home-button">Go to Home Page</button>
+      {error && <p className="error-message">{error}</p>}
     </div>
   );
 };
