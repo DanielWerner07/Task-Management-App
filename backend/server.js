@@ -192,6 +192,46 @@ app.put('/api/users/:userId/email', (req, res) => {
   });
 });
 
+app.delete('/api/users/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  db.beginTransaction(err => {
+    if (err) {
+      console.error('Error starting transaction:', err);
+      return res.status(500).json({ error: 'Failed to delete account' });
+    }
+
+    db.query('DELETE FROM tasks WHERE userId = ?', [userId], (err, result) => {
+      if (err) {
+        return db.rollback(() => {
+          console.error('Error deleting tasks:', err);
+          res.status(500).json({ error: 'Failed to delete tasks' });
+        });
+      }
+      
+      db.query('DELETE FROM users WHERE id = ?', [userId], (err, result) => {
+        if (err) {
+          return db.rollback(() => {
+            console.error('Error deleting user:', err);
+            res.status(500).json({ error: 'Failed to delete user' });
+          });
+        }
+
+        db.commit(err => {
+          if (err) {
+            return db.rollback(() => {
+              console.error('Error committing transaction:', err);
+              res.status(500).json({ error: 'Failed to delete account' });
+            });
+          }
+
+          res.status(200).json({ message: 'Account deleted successfully' });
+        });
+      });
+    });
+  });
+});
+
 app.listen(3001, () => {
   console.log('Server running on port 3001');
 });
