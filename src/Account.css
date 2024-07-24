@@ -58,3 +58,8 @@
     margin-top: 10px;
   }
   
+  .button.delete-button {
+    background-color: #e74c3c;
+    color: white;
+    margin-top: 20px;
+   }

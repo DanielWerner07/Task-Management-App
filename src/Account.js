@@ -46,6 +46,20 @@ const Account = () => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await axios.delete(`http://localhost:3001/api/users/${userId}`);
+      setSuccess(response.data.message);
+      localStorage.removeItem('userId');
+      navigate('/');
+    } catch (error) {
+      setError(error.response ? error.response.data.error : 'An error occurred');
+    }
+  };
+
   return (
     <div className="account-container">
       <h1>Account Page</h1>
@@ -65,6 +79,7 @@ const Account = () => {
         </div>
         <button type="submit" className="button">Update Email</button>
       </form>
+      <button onClick={handleDeleteAccount} className="button delete-button">Delete Account</button>
       {error && <p className="error-message">{error}</p>}
       {success && <p className="success-message">{success}</p>}
       <button onClick={() => navigate('/home')} className="button">Go to Home Page</button>
