@@ -71,3 +71,16 @@ h1 {
   gap: 0.5rem;
   margin-top: 1rem;
 }
+
+.notification-button {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.notification-button:hover {
+  background-color: #2980b9;
+}
