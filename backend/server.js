@@ -134,7 +134,6 @@ app.post('/api/create-task', (req, res) => {
   });
 });
 
-
 app.get('/api/tasks/:userId', (req, res) => {
   const { userId } = req.params;
 
@@ -172,63 +171,6 @@ app.get('/api/users/:userId', (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     res.status(200).json(results[0]);
-  });
-});
-
-app.put('/api/users/:userId/email', (req, res) => {
-  const { userId } = req.params;
-  const { email } = req.body;
-
-  if (!email || !email.includes('@')) {
-    return res.status(400).json({ error: 'Invalid email address' });
-  }
-
-  db.query('UPDATE users SET email = ? WHERE id = ?', [email, userId], (err, result) => {
-    if (err) {
-      console.error('Error updating email:', err);
-      return res.status(500).json({ error: 'Failed to update email' });
-    }
-    res.status(200).json({ message: 'Email updated successfully' });
-  });
-});
-
-app.delete('/api/users/:userId', (req, res) => {
-  const { userId } = req.params;
-
-  db.beginTransaction(err => {
-    if (err) {
-      console.error('Error starting transaction:', err);
-      return res.status(500).json({ error: 'Failed to delete account' });
-    }
-
-    db.query('DELETE FROM tasks WHERE userId = ?', [userId], (err, result) => {
-      if (err) {
-        return db.rollback(() => {
-          console.error('Error deleting tasks:', err);
-          res.status(500).json({ error: 'Failed to delete tasks' });
-        });
-      }
-
-      db.query('DELETE FROM users WHERE id = ?', [userId], (err, result) => {
-        if (err) {
-          return db.rollback(() => {
-            console.error('Error deleting user:', err);
-            res.status(500).json({ error: 'Failed to delete user' });
-          });
-        }
-
-        db.commit(err => {
-          if (err) {
-            return db.rollback(() => {
-              console.error('Error committing transaction:', err);
-              res.status(500).json({ error: 'Failed to delete account' });
-            });
-          }
-
-          res.status(200).json({ message: 'Account deleted successfully' });
-        });
-      });
-    });
   });
 });
 
