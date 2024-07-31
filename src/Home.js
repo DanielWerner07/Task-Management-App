@@ -58,7 +58,6 @@ const Home = () => {
       console.log('Name: ' + profile.getName());
       console.log('Image URL: ' + profile.getImageUrl());
       console.log('Email: ' + profile.getEmail());
-      // Save the token and other information to use later
       const id_token = googleUser.getAuthResponse().id_token;
       localStorage.setItem('googleIdToken', id_token);
     }).catch((error) => {
