@@ -7,7 +7,6 @@ const Home = () => {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [error, setError] = useState('');
-  const [userEmail, setUserEmail] = useState('');
 
   const userId = localStorage.getItem('userId');
 
@@ -15,19 +14,9 @@ const Home = () => {
     if (!userId) {
       navigate('/');
     } else {
-      fetchUserDetails();
       fetchTasks();
     }
   }, [userId, navigate]);
-
-  const fetchUserDetails = async () => {
-    try {
-      const response = await axios.get(`http://localhost:3001/api/users/${userId}`);
-      setUserEmail(response.data.email);
-    } catch (error) {
-      setError(error.response ? error.response.data.error : 'An error occurred');
-    }
-  };
 
   const fetchTasks = async () => {
     try {
@@ -44,20 +33,6 @@ const Home = () => {
       fetchTasks();
     } catch (error) {
       setError(error.response ? error.response.data.error : 'An error occurred');
-    }
-  };
-
-  const handleEmailNotification = async (taskId) => {
-    if (!userEmail) {
-      setError('Please add an email in the account page to receive notifications.');
-      return;
-    }
-
-    try {
-      await axios.post('http://localhost:3001/api/send-email-notification', { userId, taskId });
-      setError('');
-    } catch (error) {
-      setError(error.response ? error.response.data.error : 'Failed to send email notification');
     }
   };
 
@@ -95,14 +70,6 @@ const Home = () => {
               />
               Completed
             </label>
-            {task.dueDate && (
-              <button
-                className="notification-button"
-                onClick={() => handleEmailNotification(task.id)}
-              >
-                Send Email Notification
-              </button>
-            )}
           </li>
         ))}
       </ul>

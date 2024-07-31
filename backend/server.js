@@ -3,7 +3,6 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
-const AWS = require('aws-sdk');
 
 const app = express();
 
@@ -63,14 +62,6 @@ const createTables = () => {
 };
 
 createTables();
-
-AWS.config.update({
-  accessKeyId: 'YOUR_AWS_ACCESS_KEY_ID',
-  secretAccessKey: 'YOUR_AWS_SECRET_ACCESS_KEY',
-  region: 'YOUR_AWS_REGION'
-});
-
-const ses = new AWS.SES();
 
 app.post('/api/register', async (req, res) => {
   const { username, password } = req.body;
@@ -180,46 +171,6 @@ app.get('/api/users/:userId', (req, res) => {
     }
     res.status(200).json(results[0]);
   });
-});
-
-app.post('/api/send-email-notification', async (req, res) => {
-  const { userId, taskId } = req.body;
-
-  try {
-    const [userResult] = await db.promise().query('SELECT email FROM users WHERE id = ?', [userId]);
-    const userEmail = userResult[0].email;
-
-    if (!userEmail) {
-      return res.status(400).json({ error: 'User does not have an email address' });
-    }
-
-    const [taskResult] = await db.promise().query('SELECT name, dueDate FROM tasks WHERE id = ?', [taskId]);
-    const task = taskResult[0];
-
-    const params = {
-      Source: 'your-email@example.com',
-      Destination: {
-        ToAddresses: [userEmail],
-      },
-      Message: {
-        Subject: {
-          Data: `Reminder: Task "${task.name}" is due soon`,
-        },
-        Body: {
-          Text: {
-            Data: `Your task "${task.name}" is due on ${task.dueDate}. Please make sure to complete it on time.`,
-          },
-        },
-      },
-    };
-
-    await ses.sendEmail(params).promise();
-
-    res.status(200).json({ message: 'Email notification sent successfully' });
-  } catch (error) {
-    console.error('Error sending email notification:', error);
-    res.status(500).json({ error: 'Failed to send email notification' });
-  }
 });
 
 app.listen(3001, () => {
