@@ -84,3 +84,18 @@ h1 {
 .notification-button:hover {
   background-color: #2980b9;
 }
+
+.google-signin-button {
+  background-color: #4285F4;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 10px;
+}
+
+.google-signin-button:hover {
+  background-color: #357ae8;
+}

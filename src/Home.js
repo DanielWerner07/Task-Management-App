@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { gapi } from 'gapi-script';
 import './Home.css';
 
 const Home = () => {
@@ -11,6 +12,14 @@ const Home = () => {
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
+    function start() {
+      gapi.client.init({
+        clientId: 'YOUR_CLIENT_ID.apps.googleusercontent.com',
+        scope: 'email profile https://www.googleapis.com/auth/calendar',
+      });
+    }
+    gapi.load('client:auth2', start);
+    
     if (!userId) {
       navigate('/');
     } else {
@@ -41,6 +50,22 @@ const Home = () => {
     navigate('/');
   };
 
+  const handleGoogleSignIn = () => {
+    const auth2 = gapi.auth2.getAuthInstance();
+    auth2.signIn().then((googleUser) => {
+      const profile = googleUser.getBasicProfile();
+      console.log('ID: ' + profile.getId());
+      console.log('Name: ' + profile.getName());
+      console.log('Image URL: ' + profile.getImageUrl());
+      console.log('Email: ' + profile.getEmail());
+      // Save the token and other information to use later
+      const id_token = googleUser.getAuthResponse().id_token;
+      localStorage.setItem('googleIdToken', id_token);
+    }).catch((error) => {
+      console.error('Error signing in with Google:', error);
+    });
+  };
+
   return (
     <div className="home-container">
       <h1>Welcome to the Home Page!</h1>
@@ -53,6 +78,9 @@ const Home = () => {
         </button>
         <button onClick={handleLogout} className="button logout-button">
           Logout
+        </button>
+        <button onClick={handleGoogleSignIn} className="button google-signin-button">
+          Sign in with Google
         </button>
       </div>
       {error && <p className="error-message">{error}</p>}
