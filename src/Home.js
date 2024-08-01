@@ -104,23 +104,24 @@ const Home = () => {
       summary: task.name,
       description: `Task steps: ${JSON.stringify(task.steps)}`,
       start: {
-        date: task.dueDate,
+        dateTime: `${task.dueDate}T00:00:00Z`,
         timeZone: 'UTC'
       },
       end: {
-        date: task.dueDate,
+        dateTime: `${task.dueDate}T23:59:59Z`,
         timeZone: 'UTC'
       },
     };
 
-    const request = gapi.client.calendar.events.insert({
+    gapi.client.calendar.events.insert({
       calendarId: 'primary',
       resource: event,
-    });
-
-    request.execute((event) => {
-      console.log('Event created: ', event.htmlLink);
+    }).then(response => {
+      console.log('Event created:', response.result.htmlLink);
       alert('Event created in Google Calendar');
+    }).catch(error => {
+      console.error('Error creating event:', error);
+      alert('Failed to create event in Google Calendar');
     });
   };
 
