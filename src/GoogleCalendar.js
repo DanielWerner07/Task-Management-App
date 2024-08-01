@@ -29,11 +29,11 @@ export const addEventToGoogleCalendar = (task) => {
     'summary': `${task.name}`,
     'description': `Task steps: ${JSON.stringify(task.steps)}`,
     'start': {
-      'dateTime': '2024-08-03T09:00:00-07:00',
+      'dateTime': `${task.dueDate}T09:00:00-07:00`,
       'timeZone': 'America/Los_Angeles'
     },
     'end': {
-      'dateTime': '2024-08-03T17:00:00-07:00',
+      'dateTime': `${task.dueDate}T17:00:00-07:00`,
       'timeZone': 'America/Los_Angeles'
     },
     'recurrence': [
