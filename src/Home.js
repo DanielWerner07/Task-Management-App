@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { gapi } from 'gapi-script';
+import config from './config';
 import './Home.css';
 
 const Home = () => {
@@ -14,7 +15,7 @@ const Home = () => {
   useEffect(() => {
     function start() {
       gapi.client.init({
-        clientId: 'YOUR_CLIENT_ID.apps.googleusercontent.com',
+        clientId: config.googleClientId,
         scope: 'email profile https://www.googleapis.com/auth/calendar',
       });
     }
