@@ -3,30 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { gapi } from 'gapi-script';
 import config from './config';
+import { initGoogleCalendarApi, addEventToGoogleCalendar } from './GoogleCalendar';
 import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [error, setError] = useState('');
-  const [isCalendarApiLoaded, setIsCalendarApiLoaded] = useState(false);
 
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
-    function start() {
-      gapi.client.init({
-        clientId: config.googleClientId,
-        scope: 'email profile https://www.googleapis.com/auth/calendar',
-      }).then(() => {
-        return gapi.client.load('calendar', 'v3');
-      }).then(() => {
-        setIsCalendarApiLoaded(true);
-      }).catch((error) => {
-        console.error('Error loading Google Calendar API:', error);
-      });
-    }
-    gapi.load('client:auth2', start);
+    initGoogleCalendarApi(config.googleClientId);
 
     if (!userId) {
       navigate('/');
@@ -60,6 +48,7 @@ const Home = () => {
       navigate('/');
     }).catch((error) => {
       console.error('Error signing out from Google:', error);
+      // Ensure the local user is still logged out even if Google sign out fails
       localStorage.removeItem('userId');
       navigate('/');
     });
@@ -84,45 +73,6 @@ const Home = () => {
     const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-GB', options).format(date);
-  };
-
-  const addEventToGoogleCalendar = (task) => {
-    if (!isCalendarApiLoaded) {
-      console.error('Google Calendar API is not loaded yet');
-      return;
-    }
-
-    const auth2 = gapi.auth2.getAuthInstance();
-    const isSignedIn = auth2.isSignedIn.get();
-
-    if (!isSignedIn) {
-      console.error('User not signed in to Google');
-      return;
-    }
-
-    const event = {
-      summary: task.name,
-      description: `Task steps: ${JSON.stringify(task.steps)}`,
-      start: {
-        dateTime: `${task.dueDate}T00:00:00Z`,
-        timeZone: 'UTC'
-      },
-      end: {
-        dateTime: `${task.dueDate}T23:59:59Z`,
-        timeZone: 'UTC'
-      },
-    };
-
-    gapi.client.calendar.events.insert({
-      calendarId: 'primary',
-      resource: event,
-    }).then(response => {
-      console.log('Event created:', response.result.htmlLink);
-      alert('Event created in Google Calendar');
-    }).catch(error => {
-      console.error('Error creating event:', error);
-      alert('Failed to create event in Google Calendar');
-    });
   };
 
   return (
