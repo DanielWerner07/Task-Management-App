@@ -9,6 +9,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [error, setError] = useState('');
+  const [isCalendarApiLoaded, setIsCalendarApiLoaded] = useState(false);
 
   const userId = localStorage.getItem('userId');
 
@@ -17,6 +18,12 @@ const Home = () => {
       gapi.client.init({
         clientId: config.googleClientId,
         scope: 'email profile https://www.googleapis.com/auth/calendar',
+      }).then(() => {
+        return gapi.client.load('calendar', 'v3');
+      }).then(() => {
+        setIsCalendarApiLoaded(true);
+      }).catch((error) => {
+        console.error('Error loading Google Calendar API:', error);
       });
     }
     gapi.load('client:auth2', start);
@@ -80,6 +87,11 @@ const Home = () => {
   };
 
   const addEventToGoogleCalendar = (task) => {
+    if (!isCalendarApiLoaded) {
+      console.error('Google Calendar API is not loaded yet');
+      return;
+    }
+
     const auth2 = gapi.auth2.getAuthInstance();
     const isSignedIn = auth2.isSignedIn.get();
 
