@@ -79,6 +79,39 @@ const Home = () => {
     return new Intl.DateTimeFormat('en-GB', options).format(date);
   };
 
+  const addEventToGoogleCalendar = (task) => {
+    const auth2 = gapi.auth2.getAuthInstance();
+    const isSignedIn = auth2.isSignedIn.get();
+
+    if (!isSignedIn) {
+      console.error('User not signed in to Google');
+      return;
+    }
+
+    const event = {
+      summary: task.name,
+      description: `Task steps: ${JSON.stringify(task.steps)}`,
+      start: {
+        date: task.dueDate,
+        timeZone: 'UTC'
+      },
+      end: {
+        date: task.dueDate,
+        timeZone: 'UTC'
+      },
+    };
+
+    const request = gapi.client.calendar.events.insert({
+      calendarId: 'primary',
+      resource: event,
+    });
+
+    request.execute((event) => {
+      console.log('Event created: ', event.htmlLink);
+      alert('Event created in Google Calendar');
+    });
+  };
+
   return (
     <div className="home-container">
       <h1>Welcome to the Home Page!</h1>
@@ -111,6 +144,14 @@ const Home = () => {
               />
               Completed
             </label>
+            {task.dueDate && (
+              <button
+                onClick={() => addEventToGoogleCalendar(task)}
+                className="button add-to-calendar-button"
+              >
+                Add to Google Calendar
+              </button>
+            )}
           </li>
         ))}
       </ul>
