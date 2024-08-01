@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { gapi } from 'gapi-script';
-import config from './config.js';
+import config from './config';
 import './Home.css';
 
 const Home = () => {
@@ -20,7 +20,7 @@ const Home = () => {
       });
     }
     gapi.load('client:auth2', start);
-    
+
     if (!userId) {
       navigate('/');
     } else {
