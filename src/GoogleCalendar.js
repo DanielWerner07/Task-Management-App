@@ -26,17 +26,27 @@ export const addEventToGoogleCalendar = (task) => {
   }
 
   const event = {
-    summary: task.name,
-    description: `Task steps: ${JSON.stringify(task.steps)}`,
-    start: {
-      dateTime: `${task.dueDate}T00:00:00Z`,
-      timeZone: 'UTC'
+    'summary': `${task.name}`,
+    'description': `Task steps: ${JSON.stringify(task.steps)}`,
+    'start': {
+      'dateTime': '2024-08-03T09:00:00-07:00',
+      'timeZone': 'America/Los_Angeles'
     },
-    end: {
-      dateTime: `${task.dueDate}T23:59:59Z`,
-      timeZone: 'UTC'
+    'end': {
+      'dateTime': '2024-08-03T17:00:00-07:00',
+      'timeZone': 'America/Los_Angeles'
     },
-  };
+    'recurrence': [
+      'RRULE:FREQ=DAILY;COUNT=2'
+    ],
+    'reminders': {
+      'useDefault': false,
+      'overrides': [
+        {'method': 'email', 'minutes': 24 * 60},
+        {'method': 'popup', 'minutes': 10}
+      ]
+    }
+  };  
 
   gapi.client.calendar.events.insert({
     calendarId: 'primary',

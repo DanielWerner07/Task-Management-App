@@ -70,7 +70,7 @@ const Home = () => {
   };
 
   const formatDueDate = (dateString) => {
-    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    const options = { year: 'numeric' , month: '2-digit', day: '2-digit' };
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-GB', options).format(date);
   };
