@@ -48,7 +48,6 @@ const Home = () => {
       navigate('/');
     }).catch((error) => {
       console.error('Error signing out from Google:', error);
-      // Ensure the local user is still logged out even if Google sign out fails
       localStorage.removeItem('userId');
       navigate('/');
     });
