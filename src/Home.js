@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { gapi } from 'gapi-script';
-import config from './config';
+import config from './config.js';
 import './Home.css';
 
 const Home = () => {
