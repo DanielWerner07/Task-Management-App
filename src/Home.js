@@ -73,6 +73,12 @@ const Home = () => {
     });
   };
 
+  const formatDueDate = (dateString) => {
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-GB', options).format(date);
+  };
+
   return (
     <div className="home-container">
       <h1>Welcome to the Home Page!</h1>
@@ -95,7 +101,7 @@ const Home = () => {
         {tasks.map(task => (
           <li key={task.id} className={`task-item ${task.isCompleted ? 'completed' : ''}`}>
             <h3>{task.name}</h3>
-            <p>Due Date: {task.dueDate || 'No due date'}</p>
+            <p>Due Date: {task.dueDate ? formatDueDate(task.dueDate) : 'No due date'}</p>
             <p>Steps: {JSON.stringify(task.steps)}</p>
             <label className="completion-label">
               <input
