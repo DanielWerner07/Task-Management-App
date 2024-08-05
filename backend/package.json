@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "aws-amplify": "^6.4.3",
     "aws-sdk": "^2.1664.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
@@ -20,5 +21,15 @@
     "express-validator": "^7.1.0",
     "mysql": "^2.18.1",
     "mysql2": "^3.10.2"
+  },
+  "devDependencies": {
+    "@aws-amplify/backend": "^1.0.4",
+    "@aws-amplify/backend-cli": "^1.2.2",
+    "aws-cdk": "^2.151.0",
+    "aws-cdk-lib": "^2.151.0",
+    "constructs": "^10.3.0",
+    "esbuild": "^0.23.0",
+    "tsx": "^4.16.5",
+    "typescript": "^5.5.4"
   }
 }
