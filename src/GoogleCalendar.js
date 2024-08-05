@@ -37,7 +37,7 @@ export const addEventToGoogleCalendar = (task) => {
       'timeZone': 'America/Los_Angeles'
     },
     'recurrence': [
-      'RRULE:FREQ=DAILY;COUNT=2'
+      'RRULE:FREQ=DAILY;COUNT=1'
     ],
     'reminders': {
       'useDefault': false,
