@@ -28,6 +28,8 @@ db.connect((err) => {
   console.log('Connected to the database with ID ', db.threadId);
 });
 
+// Create SQL tables on server startup
+
 const createTables = () => {
   const userTable = `
     CREATE TABLE IF NOT EXISTS users (
@@ -63,6 +65,11 @@ const createTables = () => {
 
 createTables();
 
+/* 
+add new user to the user table by first validation the username and password. 
+than it hashes the password and after adding to user table checks for and infos of errors.
+*/
+
 app.post('/api/register', async (req, res) => {
   const { username, password } = req.body;
   if (username.length < 3 || password.length < 5) {
@@ -83,6 +90,11 @@ app.post('/api/register', async (req, res) => {
     res.status(200).json({ message: 'User registered successfully', userId: result.insertId });
   });
 });
+
+/*
+takes login info entered by user and compares them to info in the user table.
+if info doesn't match throws an error otherwise returns results to the AuthForm page.
+*/
 
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
@@ -106,6 +118,12 @@ app.post('/api/login', (req, res) => {
     res.status(200).json({ message: 'Login successful', userId: user.id });
   });
 });
+
+/*
+takes info user entered on the Create Task page and adds them as a new entry for the task table.
+first it validates the info and convert the steps to JSON for storage
+than it inserts the info into the table and throws errors if any occurs
+*/
 
 app.post('/api/create-task', (req, res) => {
   const { taskName, steps, dueDate, userId } = req.body;
@@ -133,6 +151,10 @@ app.post('/api/create-task', (req, res) => {
   });
 });
 
+/*
+when a user loads the Home page it will use this to fetch the tasks the users has entered.
+*/
+
 app.get('/api/tasks/:userId', (req, res) => {
   const { userId } = req.params;
 
@@ -144,6 +166,10 @@ app.get('/api/tasks/:userId', (req, res) => {
     res.status(200).json(results);
   });
 });
+
+/*
+Updates the is Completed column of a task when the users selects it on the home page.
+*/
 
 app.put('/api/tasks/:taskId', (req, res) => {
   const { taskId } = req.params;
@@ -157,6 +183,10 @@ app.put('/api/tasks/:taskId', (req, res) => {
     res.status(200).json({ message: 'Task updated successfully' });
   });
 });
+
+/*
+fetches the users info when they load into the Account page.
+*/
 
 app.get('/api/users/:userId', (req, res) => {
   const { userId } = req.params;
