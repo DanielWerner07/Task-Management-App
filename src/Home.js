@@ -15,7 +15,8 @@ const Home = () => {
 
   useEffect(() => {
     initGoogleCalendarApi(config.googleClientId);
-
+    
+    // will send the user back to the authform page if they are not logged in(no userId in local storage)
     if (!userId) {
       navigate('/');
     } else {
@@ -23,6 +24,7 @@ const Home = () => {
     }
   }, [userId, navigate]);
 
+  // gets tasks from the sql database with the users ID
   const fetchTasks = async () => {
     try {
       const response = await axios.get(`http://localhost:3001/api/tasks/${userId}`);
@@ -32,6 +34,7 @@ const Home = () => {
     }
   };
 
+  //updates a task in the database when a user clicks complete
   const handleTaskCompletion = async (taskId, isCompleted) => {
     try {
       await axios.put(`http://localhost:3001/api/tasks/${taskId}`, { isCompleted });
@@ -41,6 +44,7 @@ const Home = () => {
     }
   };
 
+  //removes a users userID from the local storage and logs them out of google then redirects them to the Authform page
   const handleLogout = () => {
     const auth2 = gapi.auth2.getAuthInstance();
     auth2.signOut().then(() => {
@@ -53,6 +57,7 @@ const Home = () => {
     });
   };
 
+  //used to sign a user in to google
   const handleGoogleSignIn = () => {
     const auth2 = gapi.auth2.getAuthInstance();
     auth2.signIn().then((googleUser) => {
@@ -68,6 +73,7 @@ const Home = () => {
     });
   };
 
+  //formats tasks due dates to better display them
   const formatDueDate = (dateString) => {
     const options = { year: 'numeric' , month: '2-digit', day: '2-digit' };
     const date = new Date(dateString);
