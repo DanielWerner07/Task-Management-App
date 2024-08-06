@@ -10,12 +10,20 @@ const AuthForm = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  /*
+  Redirect to home if user is already logged in
+  */
+
   useEffect(() => {
     const userId = localStorage.getItem('userId');
     if (userId) {
       navigate('/home');
     }
   }, [navigate]);
+
+  /*
+  Ensures the username is at least 3 characters and the password is at least 5 characters long.
+  */
 
   const validateForm = () => {
     if (username.length < 3) {
@@ -28,6 +36,11 @@ const AuthForm = () => {
     }
     return true;
   };
+
+  /*
+  Sends a POST request to either the login or register endpoint 
+  and stores the users ID for future use in calling info tied to that user
+  */
 
   const handleSubmit = async (event) => {
     event.preventDefault();
