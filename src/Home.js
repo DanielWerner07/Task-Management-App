@@ -24,7 +24,7 @@ const Home = () => {
     }
   }, [userId, navigate]);
 
-  // gets tasks from the sql database with the users ID
+  // gets tasks from the sql database with the users ID 
   const fetchTasks = async () => {
     try {
       const response = await axios.get(`http://localhost:3001/api/tasks/${userId}`);
