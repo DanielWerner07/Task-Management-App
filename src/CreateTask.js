@@ -12,8 +12,10 @@ const CreateTask = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Get user id for local storage for use in creating tasks
   const userId = localStorage.getItem('userId');
 
+  // Handlers for steps management
   const addStep = () => setSteps([...steps, '']);
   const removeStep = (index) => setSteps(steps.filter((_, i) => i !== index));
   const handleStepChange = (index, value) => {
